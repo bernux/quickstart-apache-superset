@@ -20,9 +20,7 @@ Metadata:
           - AvailabilityZones
           - VPCCIDR
           - PublicSubnet1CIDR
-          - PublicSubnet2CIDR
           - PrivateSubnet1CIDR
-          - PrivateSubnet2CIDR
       - Label:
           default: AWS Quick Start configuration
         Parameters:
@@ -46,12 +44,8 @@ Metadata:
         default: "VPC CIDR blocks"
       PublicSubnet1CIDR:
         default: "Public subnet for Availability Zone 1"
-      PublicSubnet2CIDR:
-        default: "Public subnet for Availability Zone 2"
       PrivateSubnet1CIDR:
         default: "Private subnet for Availability Zone 1"
-      PrivateSubnet2CIDR:
-        default: "Private subnet for Availability Zone 2"
       QSS3BucketName:
         default: Quick Start S3 bucket name
       QSS3KeyPrefix:
@@ -106,22 +100,10 @@ Parameters:
     ConstraintDescription: "Must be a valid IP CIDR range of the form x.x.x.x/x."
     MinLength: 9
     MaxLength: 18
-  PublicSubnet2CIDR:
-    Type: String
-    Default: 192.168.11.0/24
-    Description: 'Enter the IP range (CIDR notation) for the public subnet in Availability Zone 2.'
-    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
-    ConstraintDescription: "Must be a valid IP CIDR range of the form x.x.x.x/x."
   PrivateSubnet1CIDR:
     Type: String
     Default: 192.168.20.0/24
     Description: 'Enter the IP range (CIDR notation) for the private subnet in Availability Zone 1.'
-    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
-    ConstraintDescription: "Must be a valid IP CIDR range of the form x.x.x.x/x."
-  PrivateSubnet2CIDR:
-    Type: String
-    Default: 192.168.21.0/24
-    Description: 'Enter the IP range (CIDR notation) for the private subnet in Availability Zone 2.'
     AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
     ConstraintDescription: "Must be a valid IP CIDR range of the form x.x.x.x/x."
   QSS3BucketName:
@@ -144,7 +126,7 @@ Parameters:
       forward slashes (/).
     Type: String
   QSS3BucketRegion:
-    Default: 'cn-north-1'
+    Default: 'ca-central-1'
     Description: 'Region where the Quick Start S3 bucket (QSS3BucketName) is
       hosted. When using your own bucket, you must specify this value.'
     Type: String
@@ -182,12 +164,8 @@ Resources:
         ClusterName: !Ref 'ClusterName'
         PublicSubnet1ID:
           Fn::GetAtt: [Vpc, Outputs.PublicSubnet1ID]
-        PublicSubnet2ID:
-          Fn::GetAtt: [Vpc, Outputs.PublicSubnet2ID]
         PrivateSubnet1AID:
           Fn::GetAtt: [Vpc, Outputs.PrivateSubnet1AID]
-        PrivateSubnet2AID:
-          Fn::GetAtt: [Vpc, Outputs.PrivateSubnet2AID]
         VpcID:
           Fn::GetAtt: [Vpc, Outputs.VPCID]
 Outputs:

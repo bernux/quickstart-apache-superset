@@ -20,9 +20,7 @@ Metadata:
         Parameters:
           - VpcID
           - PublicSubnet1ID
-          - PublicSubnet2ID
           - PrivateSubnet1AID
-          - PrivateSubnet2AID
     ParameterLabels:
       UserName:
         default: "Initial Superset user Name"
@@ -36,12 +34,8 @@ Metadata:
         default: "VPC ID"
       PublicSubnet1ID:
         default: "Public subnet for Availability Zone 1"
-      PublicSubnet2ID:
-        default: "Public subnet for Availability Zone 2"
       PrivateSubnet1AID:
         default: "Private subnet for Availability Zone 1"
-      PrivateSubnet2AID:
-        default: "Private subnet for Availability Zone 2"
       ClusterName:
         default: "Amazon ECS cluster name"
 Parameters:
@@ -54,11 +48,11 @@ Parameters:
     NoEcho: True
   WithExample:
     Type: String
-    Default: "no"
+    Default: "yes"
     Description: 'Enables or disables populating the dashboard example. Setting this parameter to "yes" populates the dashboard example.'
   InstallProphet:
     Type: String
-    Default: "no"
+    Default: "yes"
     Description: 'Enables or disables Prophet library installation for Forecasting Analytics. Setting this parameter to "yes" installs Prophet to enable Forecasting Analytics.'
   VpcID:
     Type: AWS::EC2::VPC::Id
@@ -66,15 +60,9 @@ Parameters:
   PublicSubnet1ID:
     Type: AWS::EC2::Subnet::Id
     Description: Public subnet for Availability Zone 1.
-  PublicSubnet2ID:
-    Type: AWS::EC2::Subnet::Id
-    Description: Public subnet for Availability Zone 2.
   PrivateSubnet1AID:
     Type: AWS::EC2::Subnet::Id
     Description: Private subnet for Availability Zone 1.
-  PrivateSubnet2AID:
-    Type: AWS::EC2::Subnet::Id
-    Description: Private subnet for Availability Zone 2.
   ClusterName:
     Default: 'supersetOnAWS'
     Description: Name of the Amazon ECS cluster.
@@ -150,7 +138,6 @@ Resources:
       Scheme: internet-facing
       Subnets:
       - !Ref PublicSubnet1ID
-      - !Ref PublicSubnet2ID
       Tags:
       - Key: com.docker.compose.project
         Value: !Ref ClusterName
@@ -165,7 +152,6 @@ Resources:
     Type: AWS::Logs::LogGroup
   DbService:
     DependsOn:
-    - DbhomeNFSMountTargetOnSubnetB
     - DbhomeNFSMountTargetOnSubnetA
     Properties:
       Cluster:
@@ -186,7 +172,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -407,14 +392,6 @@ Resources:
       - Ref: DefaultNetwork
       SubnetId: !Ref PrivateSubnet1AID
     Type: AWS::EFS::MountTarget
-  DbhomeNFSMountTargetOnSubnetB:
-    Properties:
-      FileSystemId:
-        Ref: DbhomeFilesystem
-      SecurityGroups:
-      - Ref: DefaultNetwork
-      SubnetId: !Ref PrivateSubnet2AID
-    Type: AWS::EFS::MountTarget
   RedisAccessPoint:
     Properties:
       AccessPointTags:
@@ -447,18 +424,9 @@ Resources:
       - Ref: DefaultNetwork
       SubnetId: !Ref PrivateSubnet1AID
     Type: AWS::EFS::MountTarget
-  RedisNFSMountTargetOnSubnetB:
-    Properties:
-      FileSystemId:
-        Ref: RedisFilesystem
-      SecurityGroups:
-      - Ref: DefaultNetwork
-      SubnetId: !Ref PrivateSubnet2AID
-    Type: AWS::EFS::MountTarget
   RedisService:
     DependsOn:
-    - RedisNFSMountTargetOnSubnetB
-    - RedisNFSMountTargetOnSubnetA
+      - RedisNFSMountTargetOnSubnetA
     Properties:
       Cluster:
         Fn::GetAtt:
@@ -478,7 +446,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -629,7 +596,6 @@ Resources:
     - SupersetTCP8088Listener
     - DbService
     - RedisService
-    - SupersethomeNFSMountTargetOnSubnetB
     - SupersethomeNFSMountTargetOnSubnetA
     Properties:
       Cluster:
@@ -655,7 +621,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -904,19 +869,10 @@ Resources:
       - Ref: DefaultNetwork
       SubnetId: !Ref PrivateSubnet1AID
     Type: AWS::EFS::MountTarget
-  SupersethomeNFSMountTargetOnSubnetB:
-    Properties:
-      FileSystemId:
-        Ref: SupersethomeFilesystem
-      SecurityGroups:
-      - Ref: DefaultNetwork
-      SubnetId: !Ref PrivateSubnet2AID
-    Type: AWS::EFS::MountTarget
   SupersetinitService:
     DependsOn:
     - DbService
     - RedisService
-    - SupersethomeNFSMountTargetOnSubnetB
     - SupersethomeNFSMountTargetOnSubnetA
     Properties:
       Cluster:
@@ -938,7 +894,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1151,7 +1106,6 @@ Resources:
     DependsOn:
     - DbService
     - RedisService
-    - SupersethomeNFSMountTargetOnSubnetB
     - SupersethomeNFSMountTargetOnSubnetA
     Properties:
       Cluster:
@@ -1172,7 +1126,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1360,7 +1313,6 @@ Resources:
     DependsOn:
     - DbService
     - RedisService
-    - SupersethomeNFSMountTargetOnSubnetB
     - SupersethomeNFSMountTargetOnSubnetA
     Properties:
       Cluster:
@@ -1381,7 +1333,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1574,7 +1525,6 @@ Resources:
     DependsOn:
     - DbService
     - RedisService
-    - SupersethomeNFSMountTargetOnSubnetB
     - SupersethomeNFSMountTargetOnSubnetA
     Properties:
       Cluster:
@@ -1595,7 +1545,6 @@ Resources:
           - Ref: DefaultNetwork
           Subnets:
           - !Ref PrivateSubnet1AID
-          - !Ref PrivateSubnet2AID
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
